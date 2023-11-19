@@ -245,4 +245,4 @@ endif
 pkg = import('pkgconfig')
 pkg.generate(libass,
              name: 'libass',
-             description: 'LibASS is an SSA/ASS subtitles rendering library')
+             description: 'libass is an SSA/ASS subtitles rendering library')
