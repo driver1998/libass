@@ -8,6 +8,8 @@ conf = configuration_data()
 deps = []
 test_deps = []
 
+host_system = host_machine.system()
+
 # Compiler setup
 
 cc = meson.get_compiler('c')
@@ -102,7 +104,7 @@ endif
 
 # DirectWrite
 directwrite = false
-if host_machine.system() == 'windows' and not get_option('directwrite').disabled()
+if host_system == 'windows' and not get_option('directwrite').disabled()
     if cc.has_header('windows.h')
         directwrite = true
         conf.set('CONFIG_DIRECTWRITE', 1)
@@ -126,7 +128,7 @@ endif
 
 # CoreText
 coretext = false
-if host_machine.system() == 'darwin' and not get_option('coretext').disabled()
+if host_system == 'darwin' and not get_option('coretext').disabled()
     coretext_dep = dependency('appleframeworks', modules: ['CoreText', 'CoreFoundation'], required: false)
     appservices_dep = dependency('appleframeworks', modules: ['ApplicationServices', 'CoreFoundation'], required: false)
     if cc.has_type('CTRunRef', prefix: '#include <CoreText/CoreText.h>', dependencies: coretext_dep)
@@ -156,16 +158,17 @@ nasm_args = []
 if host_machine.cpu_family() == 'x86'
     bittype = '32'
     nasm_args += '-DARCH_X86_64=0'
-    x86 = true
+    cpu_family = 'x86'
 elif host_machine.cpu_family() == 'x86_64'
     bittype = '64'
     nasm_args += '-DARCH_X86_64=1'
-    x86 = true
-else
-    x86 = false
+    cpu_family = 'x86'
+elif host_machine.cpu_family() == 'aarch64' and host_system == 'darwin'
+    bittype = '64'
+    cpu_family = 'arm64'
 endif
 
-if x86
+if cpu_family == 'x86' or cpu_family == 'arm64'
     nasm = find_program('nasm', required: get_option('asm'))
     enable_asm = nasm.found()
 else
@@ -174,6 +177,7 @@ endif
 
 # NASM version check
 if enable_asm
+    # This can be cleaned up once 0.64 is available, see https://github.com/xclaesse/libass/commit/cfd3d9971bd585939b97409c0aac79cab3dd2da5
     nasm_r = run_command(nasm, '-v', check: true)
     out = nasm_r.stdout().strip().split()
     if out[1].to_lower() == 'version'
@@ -189,20 +193,23 @@ endif
 
 if get_option('asm').enabled() and (not enable_asm)
     error('ASM functions were enabled but are unavailable.')
-elif (not enable_asm) and x86 and (not get_option('asm').disabled())
+elif (not enable_asm) and (cpu_family == 'x86' or cpu_family == 'arm64') and (not get_option('asm').disabled())
     warning('Install nasm-2.10 or later for a significantly faster libass build.')
 endif
 
 # System check
 if enable_asm
-    host_system = host_machine.system()
     if host_system == 'windows'
         nasm_args += ['-f', 'win' + bittype]
         if bittype == '32'
             nasm_args += '-DPREFIX'
         endif
     elif host_system == 'darwin'
-        nasm_args += ['-f', 'macho' + bittype, '-DPREFIX', '-DSTACK_ALIGNMENT=16']
+        if cpu_family == 'arm64'
+            nasm_args += '-DPREFIX'
+        else
+            nasm_args += ['-f', 'macho' + bittype, '-DPREFIX', '-DSTACK_ALIGNMENT=16']
+        endif
     elif host_system == 'linux' or host_system == 'sunos' or host_system == 'haiku'
         nasm_args += ['-f', 'elf' + bittype, '-DSTACK_ALIGNMENT=16']
     elif host_system == 'dragonfly' or host_system.endswith('bsd')
@@ -215,8 +222,10 @@ endif
 
 if enable_asm
     conf.set('CONFIG_ASM', 1)
-    if x86
+    if cpu_family == 'x86'
         conf.set('ARCH_X86', 1)
+    elif cpu_family == 'arm64'
+        conf.set('ARCH_AARCH64', 1)
     endif
 
     nasm_args += '-Dprivate_prefix=ass'
