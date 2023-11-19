@@ -214,7 +214,7 @@ if enable_asm
         else
             nasm_args += ['-f', 'macho' + bittype, '-DPREFIX', '-DSTACK_ALIGNMENT=16']
         endif
-    elif host_system == 'linux' or host_system == 'sunos' or host_system == 'haiku'
+    elif host_system == 'linux' or host_system == 'sunos' or host_system == 'haiku' or host_system == 'gnu'
         nasm_args += ['-f', 'elf' + bittype, '-DSTACK_ALIGNMENT=16']
     elif host_system == 'dragonfly' or host_system.endswith('bsd')
         nasm_args += ['-f', 'elf' + bittype]
