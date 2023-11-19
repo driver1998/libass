@@ -94,6 +94,12 @@ if harfbuzz_dep.found()
     conf.set('CONFIG_HARFBUZZ', 1)
 endif
 
+libunibreak_dep = dependency('libunibreak', version: '>= 1.1', required: get_option('libunibreak'))
+if libunibreak_dep.found()
+    deps += libunibreak_dep
+    conf.set('CONFIG_LIBUNIBREAK', 1)
+endif
+
 fontconfig_dep = dependency('fontconfig', version: '>= 2.10.92', required: get_option('fontconfig'))
 fontconfig = fontconfig_dep.found()
 if fontconfig
