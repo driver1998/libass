@@ -1,3 +1,9 @@
+libass_lt_current = 11
+libass_lt_revision = 1
+libass_lt_age = 2
+
+libass_so_version = '@0@.@1@.@2@'.format(libass_lt_current - libass_lt_age, libass_lt_age, libass_lt_revision)
+
 src_x86 = files(
     'x86/be_blur.asm',
     'x86/blend_bitmaps.asm',
@@ -80,6 +86,7 @@ else
 endif
 
 libass = library('ass', libass_src, config_h,
+                 version: libass_so_version,
                  install: true,
                  include_directories: incs,
                  dependencies: deps,
