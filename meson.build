@@ -43,7 +43,7 @@ endif
 conf.set('PACKAGE_NAME', 'libass')
 conf.set('PACKAGE_VERSION', meson.project_version())
 
-conf.set('CONFIG_SOURCEVERSION', '"meson, on or after: ' + meson.project_version() + '"')
+conf.set('CONFIG_SOURCEVERSION', '"meson, commit: @VCS_TAG@"')
 
 str_check_functions = [
     'strdup',
@@ -244,7 +244,12 @@ if enable_asm
     nasm_gen = generator(nasm, output: '@BASENAME@.o', arguments: nasm_args)
 endif
 
-config_h = configure_file(output: 'config.h', configuration: conf)
+config_h_in = configure_file(output: 'config.h.in', configuration: conf)
+
+config_h = vcs_tag(command: ['git', 'describe', '--tags', '--long', '--always', '--broken', '--abbrev=40'],
+                   fallback: 'failed to determine (>= @0@)'.format(meson.project_version()),
+                   input: config_h_in,
+                   output: 'config.h')
 
 incs = include_directories('.', 'libass')
 
