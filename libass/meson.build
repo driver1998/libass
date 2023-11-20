@@ -20,6 +20,7 @@ src_c = files(
 src_arm64 = files(
     'aarch64/asm.S',
     'aarch64/be_blur.S',
+    'aarch64/blur.S',
     'aarch64/blend_bitmaps.S',
     'aarch64/rasterizer.S',
 )
@@ -67,10 +68,17 @@ if coretext
 endif
 
 if enable_asm
+    asm_sources = []
     if cpu_family == 'x86'
-        libass_src += nasm_gen.process(src_x86)
+        asm_sources = src_x86
     elif cpu_family == 'arm64'
-        libass_arc += nasm_gen.process(src_arm64)
+        asm_sources = src_arm64
+    endif
+
+    if use_nasm
+      libass_src += nasm_gen.process(asm_sources)
+    else
+      libass_src += asm_sources
     endif
 endif
 
