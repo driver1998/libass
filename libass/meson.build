@@ -52,6 +52,8 @@ libass_src = files(
 
 libass_src += src_c
 
+libass_link_with = []
+
 libass_headers = files(
     'ass.h',
     'ass_types.h'
@@ -78,7 +80,11 @@ if enable_asm
     if use_nasm
       libass_src += nasm_gen.process(asm_sources)
     else
-      libass_src += asm_sources
+      asm_lib = static_library('libass_asm',
+                               sources: asm_sources,
+                               c_args: asm_args,
+                               include_directories: incs)
+      libass_link_with += asm_lib
     endif
 endif
 
@@ -94,6 +100,7 @@ else
 endif
 
 libass = library('ass', libass_src, config_h,
+                 link_with: libass_link_with,
                  version: libass_so_version,
                  install: true,
                  include_directories: incs,

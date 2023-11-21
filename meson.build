@@ -248,8 +248,6 @@ if enable_asm
         asm_args += ['-I', meson.current_source_dir() / 'libass' + '/', '-DPIC=1', '-o', '@OUTPUT@', '@INPUT@']
 
         nasm_gen = generator(nasm, output: '@BASENAME@.o', arguments: asm_args)
-    else
-        add_project_arguments(asm_args, language: 'c')
     endif
 endif
 
