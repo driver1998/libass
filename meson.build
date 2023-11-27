@@ -214,24 +214,24 @@ endif
 
 # System check
 if enable_asm
-    if host_system == 'windows'
-        asm_args += ['-f', 'win' + bittype]
-        if bittype == '32'
-            asm_args += '-DPREFIX'
-        endif
-    elif host_system == 'darwin'
-        if cpu_family == 'arm64'
-            asm_args += '-DPREFIX'
-        else
+    if use_nasm
+        if host_system == 'windows'
+            asm_args += ['-f', 'win' + bittype]
+            if bittype == '32'
+                asm_args += '-DPREFIX'
+            endif
+        elif host_system == 'darwin'
             asm_args += ['-f', 'macho' + bittype, '-DPREFIX', '-DSTACK_ALIGNMENT=16']
+        elif host_system == 'linux' or host_system == 'sunos' or host_system == 'haiku' or host_system == 'gnu'
+            asm_args += ['-f', 'elf' + bittype, '-DSTACK_ALIGNMENT=16']
+        elif host_system == 'dragonfly' or host_system.endswith('bsd')
+            asm_args += ['-f', 'elf' + bittype]
+        else
+            error('Please contact libass upstream to figure out if ASM support for your platform can be added. In the meantime, disabling.')
+            enable_asm = false
         endif
-    elif host_system == 'linux' or host_system == 'sunos' or host_system == 'haiku' or host_system == 'gnu'
-        asm_args += ['-f', 'elf' + bittype, '-DSTACK_ALIGNMENT=16']
-    elif host_system == 'dragonfly' or host_system.endswith('bsd')
-        asm_args += ['-f', 'elf' + bittype]
-    else
-        error('Please contact libass upstream to figure out if ASM support for your platform can be added. In the meantime, disabling.')
-        enable_asm = false
+    elif cpu_family == 'arm64'
+        asm_args += '-DPREFIX'
     endif
 endif
 
