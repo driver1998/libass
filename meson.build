@@ -1,5 +1,5 @@
 project('libass', 'c', license: 'ISC',
-        meson_version: '>= 0.55.0',
+        meson_version: '>= 0.60.0',
         # cpp_std specified because meson compiler options are currently global, can be set per-subproject with 0.63
         default_options: ['c_std=c99', 'cpp_std=c++11', 'buildtype=debugoptimized', 'warning_level=2', 'default_library=static'],
         version: '0.17.1')
@@ -60,12 +60,8 @@ endforeach
 
 deps += cc.find_library('m', required: false)
 
-# Replace with Meson iconv lookup (`dependency('iconv')`) once 0.60 can be required, see: https://github.com/libass/libass/pull/330#discussion_r707666730
-iconv_dep = cc.find_library('iconv', required: false)
+iconv_dep = dependency('iconv', required: false)
 if iconv_dep.found()
-    deps += iconv_dep
-endif
-if iconv_dep.found() or cc.has_function('iconv_open')
     conf.set('CONFIG_ICONV', 1)
 endif
 
