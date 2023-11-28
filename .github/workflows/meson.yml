@@ -97,3 +97,7 @@ jobs:
 
       - name: Build
         run: meson compile -C build
+
+      - name: Dump Meson Debug Info
+        if: failure()
+        run: cat build/meson-logs/meson-log.txt
