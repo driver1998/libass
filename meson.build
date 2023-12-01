@@ -62,6 +62,7 @@ deps += cc.find_library('m', required: false)
 
 iconv_dep = dependency('iconv', required: false)
 if iconv_dep.found()
+    deps += iconv_dep
     conf.set('CONFIG_ICONV', 1)
 endif
 
