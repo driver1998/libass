@@ -170,7 +170,7 @@ elif host_machine.cpu_family() == 'x86_64'
     bittype = '64'
     asm_args += '-DARCH_X86_64=1'
     cpu_family = 'x86'
-elif host_machine.cpu_family() == 'aarch64' and host_system == 'darwin'
+elif host_machine.cpu_family() == 'aarch64'
     bittype = '64'
     cpu_family = 'arm64'
 endif
@@ -179,7 +179,7 @@ if cpu_family == 'x86'
     nasm = find_program('nasm', required: get_option('asm'))
     enable_asm = nasm.found()
     use_nasm = true
-elif cpu_family == 'arm64'
+elif cpu_family == 'arm64' and host_system == 'darwin'
     enable_asm = true
     use_nasm = false
 else
